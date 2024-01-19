@@ -2,17 +2,17 @@
 package main
 
 import (
+	"fmt"
 	"math/rand"
 	"time"
 
 	"github.com/fatih/color"
 )
 
-// variable
-var seatingCapcity = 10
-var arrivalRate = 100
-var cuttingTime = 1000 * time.Millisecond
-var timeOpen = 10 * time.Second
+var seatingCapcity = 3 // this is the no of total capicaity of the shop : Seating capacity
+var arrivalRate = 100 // this time is for how much time a client will take to come : indirectly
+var cuttingTime = 1000 * time.Millisecond // this time is for how much time a barber takes to cut the hair
+var timeOpen = 5 * time.Second // this time is for how much time shop will be open
 
 func main() {
 	rand.Seed(time.Now().UnixNano())
@@ -47,5 +47,26 @@ func main() {
 		closed <- true
 
 	}()
-	time.Sleep(40 * time.Second)
+	
+	// Now we will add client : This will be also in go routine 
+	clientNo := 1
+
+	go func(){
+		for {
+			// taking an random number 
+			randMillSeconds := rand.Int() % (2 *arrivalRate)
+			fmt.Println("Random no is ", randMillSeconds)
+			select{
+			case <- shopClosing :
+				return 
+			case <- time.After(time.Millisecond * time.Duration(randMillSeconds)):
+				clientName := fmt.Sprintf("Client%d",clientNo)
+				clientNo++
+				shop.AddClient(clientName)
+			}
+		}
+	}()
+
+	<- closed
+	close(closed)
 }
