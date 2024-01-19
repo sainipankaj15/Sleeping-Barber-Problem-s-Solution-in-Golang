@@ -2,7 +2,6 @@
 package main
 
 import (
-
 	"math/rand"
 	"time"
 
@@ -23,18 +22,30 @@ func main() {
 	clientChan := make(chan string, seatingCapcity) // Buffered channel
 	doneChan := make(chan bool)
 
-	shop  := BarberShop{
-		ShopCapacity: seatingCapcity,
+	shop := BarberShop{
+		ShopCapacity:    seatingCapcity,
 		HairCutDuration: cuttingTime,
 		NumberOfBarbers: 0,
-		BarberDoneChan: doneChan,
-		ClientsChan: clientChan,
-		shopOpen: true,
+		BarberDoneChan:  doneChan,
+		ClientsChan:     clientChan,
+		shopOpen:        true,
 	}
 
 	color.Green("The Shop is open Now!!")
 
+	// Adding Barber in the Shop
 	shop.AddBarber("Pankaj")
 
-	time.Sleep(4 * time.Second)
+	// Run barber shop in a go rotuine
+	shopClosing := make(chan bool)
+	closed := make(chan bool)
+	go func() {
+		// Sleep this goroutine : For the timings of shop opens
+		<-time.After(timeOpen)
+		shopClosing <- true
+		shop.CloseShopForTheDay()
+		closed <- true
+
+	}()
+	time.Sleep(40 * time.Second)
 }

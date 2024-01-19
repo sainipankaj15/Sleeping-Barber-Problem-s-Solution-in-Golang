@@ -65,3 +65,23 @@ func (barberShop *BarberShop) barberGoesHome(barber string) {
 	color.Blue("%s is going home", barber)
 	barberShop.BarberDoneChan <- true
 }
+
+func (barberShop *BarberShop) CloseShopForTheDay() {
+	color.Red("Shop is going to close day and Not accepting any new client")
+
+	// So basiclly now we have to close the channel of client
+	close(barberShop.ClientsChan)
+	barberShop.shopOpen = false
+
+	//Now here we will wait to wait to go home for all barbers
+
+	for i := 0; i <= barberShop.NumberOfBarbers; i++ {
+		// This code will block until and unless something comes on BarberDoneChannel  
+		<- barberShop.BarberDoneChan
+	}
+
+	close(barberShop.BarberDoneChan)
+	color.Cyan("--------------------------------------------------------------")
+	color.Green("The barber Shop is now closed and all barber has gone to home")
+	color.Cyan("--------------------------------------------------------------")
+}
